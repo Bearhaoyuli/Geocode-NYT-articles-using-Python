@@ -1,3 +1,7 @@
 from nytimesarticle import articleAPI # import NYT Article Search API
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
 import requests # import requests library to access URL content
+
+articles = api.search(fq = {'headline': 'Dakota Access', 'glocations.contains': 'North Dakota'}, begin_date = '20161119', end_date = '20161123', fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline', 'pub_date', 'byline'])
+
+print articles
