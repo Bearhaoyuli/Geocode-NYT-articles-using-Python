@@ -1,1 +1,3 @@
-from nytimesarticle import articleAPI
+from nytimesarticle import articleAPI # import NYT Article Search API
+api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
+import requests # import requests library to access URL content
