@@ -6,11 +6,8 @@ import requests # import requests library to access URL content
 
 articles = api.search(fq = {'headline': '*', 'glocations.contains': 'North Dakota'}, begin_date = '20161119', end_date = '20161123', fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline', 'pub_date', 'byline'])
 
-
 print articles['response']['docs'][0]['headline']['main']
 print articles['response']['docs'][0]['web_url']
-
-
 
 from geopy.geocoders import Nominatim
 geolocator = Nominatim()
