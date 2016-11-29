@@ -127,6 +127,49 @@ see if match for each article, and if there is, map based on this, if not, do NY
 
 ##############################################################################################
 
+import requests, json
+from nytimesarticle import articleAPI
+from geopy.geocoders import Nominatim
+from HTMLParser import HTMLParser
+from bs4 import BeautifulSoup
+
+url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
+headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
+
+api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key for ArticleSearch API
+
+articleURL = 'http://www.nytimes.com/2016/11/27/us/politics/steve-bannon-white-house.html?hp&action=click&pgtype=Homepage&clickSource=image&module=b-lede-package-region&region=top-news&WT.nav=top-news&_r=0' # Article URL to pass through HTML parser
+
+r = requests.get(articleURL) # Create response object to make requests
+
+HTML = BeautifulSoup(r.text) # Create object to parse HTML text from webpage using Beautiful Soup and HTMLParser standard library
+
+articleTxt = [''.join(s.findAll(text=True))for s in HTML.findAll('p')] # Create list, find all HTML text elements, create for loop to find all paragraph elements in HTML, then join text to empty string. This converts all HTML text to string within list
+
+artSlice = articleTxt[1:10] # Slice list of article text to get first paragraph of article
+
+GPinput = ''  
+for item in artSlice: # Create for loop to extract list elements and join to empty string
+    GPinput = GPinput + ''.join(item)
+
+data = {'inputText': GPinput} # Passing HTML text into Geoparser API
+
+resp = requests.post(url, headers=headers, data=data) # Create another response object to make request for Geoparser output
+
+json = json.loads(resp.text) # Decode json output from Geoparser
+
+if json['features'] == []:
+    print "-73.9904, 40.7562 New York Times building, NY, US"
+    
+else:
+    placeCoordinates = json['features'][0]['geometry']['coordinates'] # Index for coordinates of location in article
+    placeName = json['features'][0]['properties']['name'] # Index for name of location in article
+    placeADM1 = json['features'][0]['properties']['admin1'] # Index for first-level administrative district of location in article
+    placeCountry = json['features'][0]['properties']['country'] # Index for country of location in article
+    print placeCoordinates, placeName, placeADM1, placeCountry
+
+#############################################################################################
+
 from nytimesarticle import articleAPI # import NYT Article Search API
 
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
