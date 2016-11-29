@@ -16,3 +16,36 @@ location = geolocator.geocode('North Dakota')
 #print '\n' + str(location.raw)
 print '\n'
 print location.raw['lon'], location.raw['lat'],location.raw['boundingbox']
+
+###
+
+import requests, json
+from nytimesarticle import articleAPI
+from geopy.geocoders import Nominatim
+from HTMLParser import HTMLParser
+from bs4 import BeautifulSoup
+
+url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
+headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
+api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key for ArticleSearch API
+
+articleURL = 'http://www.nytimes.com/2016/11/27/us/politics/steve-bannon-white-house.html?hp&action=click&pgtype=Homepage&clickSource=image&module=b-lede-package-region&region=top-news&WT.nav=top-news&_r=0' # Article URL to pass through HTML parser
+r = requests.get(articleURL) # Create Response object to make requests
+
+HTML = BeautifulSoup(r.text, 'html.parser') # Create object to parse HTML from webpage using Beautiful Soup and HTMLParser standard library
+
+articleTxt = HTML.body.get_text() # Get and format all body text
+
+"""
+txtList = []
+for ch in range(500, len(articleTxt)):
+    txtList.append(ch)
+    print txtList
+data = {'inputText': articleTxt}
+
+resp = requests.post(url, headers=headers, data=data)
+
+print json.dumps(resp.json())"""
+
+print articleTxt
+###
