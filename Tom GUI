@@ -1,0 +1,69 @@
+from Tkinter import *
+import tkMessageBox    #the * in previous line should already import this but need this line b/c of line 10 and 32
+
+def save():
+    text = E1.get() + "\n" + "glocations, " + E2.get() + "\n" + E3.get() + "\n" + E4.get()  
+    with open("QueryResults.txt", "w") as f:
+        f.writelines(text)
+
+def saveMessage():
+    tkMessageBox.showinfo("Query Message", "Success! Query in progress.")
+
+def buttonClicked():
+    save()
+    saveMessage()
+    
+      
+top = Tk(className = "NYTimes Article Search GUI")
+top.minsize(width = 400, height = 100)
+
+Label(top, text = "Search Words").grid(row=0)     #Searches through Headline, Body, and Byline
+Label(top, text = "Geographic Location (Only one)").grid(row=1)    #By only having the user input 1 location, we can use this location to zoom in the map
+Label(top, text = "Start Date (YYYYMMDD)").grid(row=2)
+Label(top, text = "End Date (YYYYMMDD)").grid(row=3)
+
+E1 = Entry(top)
+E2 = Entry(top)
+E3 = Entry(top)
+E4 = Entry(top)
+
+E1.grid(row=0, column=1)
+E2.grid(row=1, column=1)
+E3.grid(row=2, column=1)
+E4.grid(row=3, column=1)
+
+
+Button(top, text = "GO", command = buttonClicked).grid(row=4, column=0)
+
+
+top.mainloop()
+
+
+
+
+
+folderPath = "F:\\Tom_Smith_Python_Programming_Fall_2016\\Module_2_Comp_Programming_for_GIS\\Final_Project\\"
+inputFN = "QueryResults.txt"
+inputFilePath = folderPath + inputFN
+
+f1 = open(inputFilePath, "r")
+fileString = f1.read()
+f1.close()
+
+queryList = fileString.split("\n")
+
+
+
+wordSearch = queryList[0]
+print wordSearch
+geoLocation = queryList[1].split(", ")
+if geoLocation[1] == "":
+    geoLocDict = "No location specified"     #then see if location exists in first word of first line of article and use that
+    print geoLocDict
+else:
+    geoLocDict = {geoLocation[0]:geoLocation[1]}
+    print geoLocDict
+searchDateStart = queryList[2]
+print searchDateStart
+searchDateEnd = queryList[3]
+print searchDateEnd
