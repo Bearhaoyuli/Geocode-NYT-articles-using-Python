@@ -1,0 +1,78 @@
+import csv
+import os
+from geopy.geocoders import Nominatim
+from nytimesarticle import articleAPI # import NYT Article Search API
+import arcpy
+import requests # import requests library to access URL content
+inputWorkspace = r'D:\Computer Prog GIS\Final Project'
+
+api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
+
+articles = api.search(fq = {'headline': '*', 'glocations.contains': 'New York'}, begin_date = '20160119', end_date = '20161123', fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline', 'pub_date', 'byline'])
+#print len(articles['response']['docs'])#f = keywords? indexing mess up?
+
+i = 0
+titles = []
+# loop every news record
+while i < len(articles['response']['docs']):
+    # append head line 
+    titles.append(articles['response']['docs'][i]['headline']['main'])# headLine
+    i= i+1
+
+u = 0
+urls = []
+# loop every news records
+while u < len(articles['response']['docs']):
+    # append url to list
+    urls.append(articles['response']['docs'][u]['web_url']) # urls
+    u= u+1
+
+
+geolocator = Nominatim()
+location = geolocator.geocode('New York')
+
+print location.raw['lon'], location.raw['lat']#location.raw['boundingbox']
+
+lon = location.raw['lon']
+lat = location.raw['lat']
+#Dynamic
+
+header = ["Lat", "Lon", "Title", "URL"]
+#rows = [lat, lon, title, url]
+csvName = "test.csv"
+testCsv = os.path.join(inputWorkspace, csvName)
+f = open(testCsv, 'wb')
+w = csv.writer(f, delimiter = ',')
+w.writerow(header)
+
+#print title[1]
+
+
+t = 0
+while t < len(articles['response']['docs']):
+    print t
+    # title = str(titles[t])
+    title = titles[t].encode('utf-8')
+    title_origin = titles[t]
+    print title
+    print title_origin
+    # url = str(urls[t])
+    url = urls[t].encode('utf-8')
+    url_origin = urls[t]
+    print url
+    print url_origin
+    rows = [lat, lon, title, url]
+    w.writerow(rows)
+    t = t+ 1    
+
+f.close()
+
+
+arcpy.env.workspace = r'D:\Computer Prog GIS\Final Project'
+print 1
+output = 'Geocode'
+arcpy.MakeXYEventLayer_management(testCsv, 'Lat', 'Lon', output)
+print output
+saved = 'result.lyr'
+arcpy.SaveToLayerFile_management(output, saved)
+print saved
