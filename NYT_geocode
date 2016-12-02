@@ -1,7 +1,14 @@
-#Code for GUI
+#Tom's GUI code
 
 from Tkinter import *
 import tkMessageBox    #the * in previous line should already import this but need this line b/c of line 10 and 32
+import requests, json, csv, os, arcpy
+from nytimesarticle import articleAPI
+from geopy.geocoders import Nominatim
+from HTMLParser import HTMLParser
+from bs4 import BeautifulSoup
+
+api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
 
 def save():
     text = E1.get() + "\n" + "glocations, " + E2.get() + "\n" + E3.get() + "\n" + E4.get()  
@@ -44,7 +51,7 @@ top.mainloop()
 
 
 
-folderPath = "F:\\Tom_Smith_Python_Programming_Fall_2016\\Module_2_Comp_Programming_for_GIS\\Final_Project\\"
+folderPath = "D:\\GISComputerProgramming\\FinalProject\\"
 inputFN = "QueryResults.txt"
 inputFilePath = folderPath + inputFN
 
@@ -52,27 +59,33 @@ f1 = open(inputFilePath, "r")
 fileString = f1.read()
 f1.close()
 
+
 queryList = fileString.split("\n")
 
 
 
 wordSearch = queryList[0]
 print wordSearch
-geoLocation = queryList[1].split(", ")
-if geoLocation[1] == "":
-    geoLocDict = "No location specified"     #then see if location exists in first word of first line of article and use that
-    print geoLocDict
-else:
-    geoLocDict = {geoLocation[0]:geoLocation[1]}
-    print geoLocDict
 searchDateStart = queryList[2]
 print searchDateStart
 searchDateEnd = queryList[3]
 print searchDateEnd
+geoLocation = queryList[1].split(", ")
+if geoLocation[1] == "":
+    print "No location specified"         #then see if location exists in first word of first line of article and use that
+    articles = api.search(q = wordSearch, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline'])
+    print articles
+    #print len(articles)
+else:
+    geoLocDict = {geoLocation[0]:geoLocation[1]}
+    print geoLocDict
+    articles = api.search(q = wordSearch, fq = geoLocDict, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline'])
+    print articles
+    #print len(articles)
+    
 
 
 
- 
 #make sure blank gui inputs are .........dealt with    if line = "", don't add it to list or something
 #figure out how to connect the article search api with the geographic api to get the coordinates associated with the queried articles so that we can map them
 #also figure out how to make a dictionary from the field query types such that user inputs for the field query lines in text file are added as values for the correct
@@ -80,58 +93,36 @@ print searchDateEnd
 
 
 
-"""
-check to see if i can have multiple inputs for glocations: or if i need to use
-glocations.contains for when there is multiple inputs (can just say that only one location
-input allowed to make things easy and allow the map to zoom to only one area)
-"""
-
+#check to see if i can have multiple inputs for glocations: or if i need to use
+#glocations.contains for when there is multiple inputs (can just say that only one location
+#input allowed to make things easy and allow the map to zoom to only one area)
 
 #instead of saving user inputs, coud use the function entry = E1.get()
 
 
-'''
-if user leave blank, make sure that is okay
-1 key, multiple values for glocations.contains, make sure that works, have to make a list for values
 
-if/while/for functions so that each time the go button is clicked, saves a new text file,
-have the number at end of text file name increase by 1 or something (not sure how to do)
-'''
+#if user leave blank, make sure that is okay
+#1 key, multiple values for glocations.contains, make sure that works, have to make a list for values
 
+#if/while/for functions so that each time the go button is clicked, saves a new text file,
+#have the number at end of text file name increase by 1 or something (not sure how to do)
 
+#geoparcer API service - used GeoNames
 
+#or 
 
-'''
-geoparcer API service - used GeoNames
+#if user input location into gui, use to zoom for map and query articles
 
-or 
+#if no user location input (""), see if there is a location name as the first
+#word in the first line of the article, if there isn't, location will be New York City and use that to zoom for map
+#NYC used for geocoding.
 
-if user input location into gui, use to zoom for map and query articles
-
-if no user location input (""), see if there is a location name as the first
-word in the first line of the article, if there isn't, location will be New York City and use that to zoom for map
-NYC used for geocoding.
-
-if no user location input (""), if there is a location name as the first word in
-the first line of the article, run it through the list of domestic city, state, state abriviation to
-see if match for each article, and if there is, map based on this, if not, do NYC again
+#if no user location input (""), if there is a location name as the first word in
+#the first line of the article, run it through the list of domestic city, state, state abriviation to
+#see if match for each article, and if there is, map based on this, if not, do NYC again
 
 
-
-
-
-
-
-
-
-
-##############################################################################################
-
-import requests, json
-from nytimesarticle import articleAPI
-from geopy.geocoders import Nominatim
-from HTMLParser import HTMLParser
-from bs4 import BeautifulSoup
+############################################################################################## Amy's Script
 
 url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
 headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
@@ -166,58 +157,83 @@ else:
     placeName = json['features'][0]['properties']['name'] # Index for name of location in article
     placeADM1 = json['features'][0]['properties']['admin1'] # Index for first-level administrative district of location in article
     placeCountry = json['features'][0]['properties']['country'] # Index for country of location in article
-    print placeCoordinates, placeName, placeADM1, placeCountry
-
-#############################################################################################
-
-from nytimesarticle import articleAPI # import NYT Article Search API
-
+    print placeCoordinates, placeName, placeADM1, placeCountry'''
+'''
+############################################################################################# Haoyu's Script
+inputWorkspace = r'H:\GISComputerProgramming\FinalProject'
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
 
-import requests # import requests library to access URL content
+articles = api.search(q = wordSearch, fq = {geoLocDict}, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline', 'pub_date', 'byline'])
 
-articles = api.search(fq = {'headline': '*', 'glocations.contains': 'North Dakota'}, begin_date = '20161119', end_date = '20161123', fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline', 'pub_date', 'byline'])
 
-print articles['response']['docs'][0]['headline']['main']
-print articles['response']['docs'][0]['web_url']
-
-from geopy.geocoders import Nominatim
 geolocator = Nominatim()
-location = geolocator.geocode('North Dakota')
+location = geolocator.geocode(geoLocDict)
 
-#print '\n' + str(location.raw)
-print '\n'
-print location.raw['lon'], location.raw['lat'],location.raw['boundingbox']
 
-###
+#print len(articles['response']['docs'])#f = keywords? indexing mess up?
 
-import requests, json
-from nytimesarticle import articleAPI
-from geopy.geocoders import Nominatim
-from HTMLParser import HTMLParser
-from bs4 import BeautifulSoup
+i = 0
+titles = []
+# loop every news record
+while i < len(articles['response']['docs']):
+    # append head line 
+    titles.append(articles['response']['docs'][i]['headline']['main'])# headLine
+    i= i+1
 
-url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
-headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
-api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key for ArticleSearch API
+u = 0
+urls = []
+# loop every news records
+while u < len(articles['response']['docs']):
+    # append url to list
+    urls.append(articles['response']['docs'][u]['web_url']) # urls
+    u= u+1
 
-articleURL = 'http://www.nytimes.com/2016/11/27/us/politics/steve-bannon-white-house.html?hp&action=click&pgtype=Homepage&clickSource=image&module=b-lede-package-region&region=top-news&WT.nav=top-news&_r=0' # Article URL to pass through HTML parser
-r = requests.get(articleURL) # Create Response object to make requests
 
-HTML = BeautifulSoup(r.text, 'html.parser') # Create object to parse HTML from webpage using Beautiful Soup and HTMLParser standard library
+geolocator = Nominatim()
+location = geolocator.geocode('New York')
 
-articleTxt = HTML.body.get_text() # Get and format all body text
+print location.raw['lon'], location.raw['lat']#location.raw['boundingbox']
 
-"""
-txtList = []
-for ch in range(500, len(articleTxt)):
-    txtList.append(ch)
-    print txtList
-data = {'inputText': articleTxt}
+lon = location.raw['lon']
+lat = location.raw['lat']
+#Dynamic
 
-resp = requests.post(url, headers=headers, data=data)
+header = ["Lat", "Lon", "Title", "URL"]
+#rows = [lat, lon, title, url]
+csvName = "test.csv"
+testCsv = os.path.join(inputWorkspace, csvName)
+f = open(testCsv, 'wb')
+w = csv.writer(f, delimiter = ',')
+w.writerow(header)
 
-print json.dumps(resp.json())"""
+#print title[1]
 
-print articleTxt
-###
+
+t = 0
+while t < len(articles['response']['docs']):
+    print t
+    # title = str(titles[t])
+    title = titles[t].encode('utf-8')
+    title_origin = titles[t]
+    print title
+    print title_origin
+    # url = str(urls[t])
+    url = urls[t].encode('utf-8')
+    url_origin = urls[t]
+    print url
+    print url_origin
+    rows = [lat, lon, title, url]
+    w.writerow(rows)
+    t = t+ 1    
+
+f.close()
+
+
+arcpy.env.workspace = r'H:\GISComputerProgramming\FinalProject'
+print 1
+output = 'Geocode'
+arcpy.MakeXYEventLayer_management(testCsv, 'Lat', 'Lon', output)
+print output
+saved = 'result.lyr'
+arcpy.SaveToLayerFile_management(output, saved)
+print saved'''
