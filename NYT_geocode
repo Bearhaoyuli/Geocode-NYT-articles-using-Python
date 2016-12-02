@@ -8,7 +8,7 @@ from geopy.geocoders import Nominatim
 from HTMLParser import HTMLParser
 from bs4 import BeautifulSoup
 
-api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
+api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb')  # NYT Article Search API key
 
 def save():
     text = E1.get() + "\n" + "glocations, " + E2.get() + "\n" + E3.get() + "\n" + E4.get()  
@@ -60,31 +60,32 @@ fileString = f1.read()
 f1.close()
 
 
-queryList = fileString.split("\n")
-
-
-
-wordSearch = queryList[0]
+queryList = fileString.split("\n")  # User input query
+print queryList
+wordSearch = queryList[0]  # User input keywords
 print wordSearch
-searchDateStart = queryList[2]
+searchDateStart = queryList[2]  # User input begin date
 print searchDateStart
-searchDateEnd = queryList[3]
+searchDateEnd = queryList[3]  # User input end date
 print searchDateEnd
+
 geoLocation = queryList[1].split(", ")
 if geoLocation[1] == "":
     print "No location specified"         #then see if location exists in first word of first line of article and use that
     articles = api.search(q = wordSearch, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline'])
+    for ele in articles:
+        if ele.has_key('response') == 'True'
+            GParticleeURL = articles['docs'][4]['web_url']
+
     print articles
     #print len(articles)
 else:
     geoLocDict = {geoLocation[0]:geoLocation[1]}
     print geoLocDict
     articles = api.search(q = wordSearch, fq = geoLocDict, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline'])
-    print articles
+    GParticleURL = articles['response']['docs'][4]['web_url']  # Access output web URLs from Article Search
+    print GParticleURL
     #print len(articles)
-    
-
-
 
 #make sure blank gui inputs are .........dealt with    if line = "", don't add it to list or something
 #figure out how to connect the article search api with the geographic api to get the coordinates associated with the queried articles so that we can map them
@@ -119,15 +120,13 @@ else:
 
 #if no user location input (""), if there is a location name as the first word in
 #the first line of the article, run it through the list of domestic city, state, state abriviation to
-#see if match for each article, and if there is, map based on this, if not, do NYC again
+#see if match for each article, and if there is, map based on this, if not, do NYC again"""
 
 
 ############################################################################################## Amy's Script
-
+"""
 url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
 headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
-
-api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key for ArticleSearch API
 
 articleURL = 'http://www.nytimes.com/2016/11/27/us/politics/steve-bannon-white-house.html?hp&action=click&pgtype=Homepage&clickSource=image&module=b-lede-package-region&region=top-news&WT.nav=top-news&_r=0' # Article URL to pass through HTML parser
 
@@ -237,3 +236,4 @@ print output
 saved = 'result.lyr'
 arcpy.SaveToLayerFile_management(output, saved)
 print saved'''
+"""
