@@ -7,7 +7,7 @@ from nytimesarticle import articleAPI
 from geopy.geocoders import Nominatim
 from HTMLParser import HTMLParser
 from bs4 import BeautifulSoup
-########################## TESTING USING: Clinton, '', 20161108, 20161109
+########################## TESTING USING: Clinton, 'New York', 20161108, 20161109
 
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb')  # NYT Article Search API key
 
@@ -59,17 +59,18 @@ f1.close()
 
 
 queryList = fileString.split("\n")  # User input query
-print queryList
+
 wordSearch = queryList[0]  # User input keywords
-print wordSearch
+print wordSearch  # Test
+
 searchDateStart = queryList[2]  # User input begin date
-print searchDateStart
+print searchDateStart  # Test
+
 searchDateEnd = queryList[3]  # User input end date
-print searchDateEnd
+print searchDateEnd  # Test
 
 geoLocation = queryList[1].split(", ")
 HLURLnoLoc = {}  # Initialize empty dictionary to store headline:URL pairs when user specifies no location
-HLURLLoc = {}  # Initialize empty dictionary to store headline:URL pairs when user specifies location
 
 if geoLocation[1] == "":  # If no location is specified by user
     print "No location specified"         #then see if location exists in first word of first line of article and use that
@@ -83,7 +84,7 @@ if geoLocation[1] == "":  # If no location is specified by user
         print HLURLnoLoc  # Test
         print webURL  # Test
         print headline  # Test
-    print articles
+    print articles  # Test
     #print len(articles)
 
 else:  # If user specifies location
@@ -91,14 +92,7 @@ else:  # If user specifies location
     print geoLocDict
     articles = api.search(q = wordSearch, fq = geoLocDict, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline'])
     accessKey = articles['response']['docs']  # Create variable that accesses keys of nested dictionaries from Article Search results
-    for ele in accessKey:  # Loop through each element in the Article Search nested dictionaries
-        webURL = ele['web_url']  # Access web URL key in nested dictionary and assign to variable
-        headline = ele['headline']['main']  # Access main headline in nested dictionary and assign to variable.
-        HLURLLoc[headline] = webURL  # Updates empty dictionary with headline:URL pairs
-        print HLURLLoc  # Test
-        print webURL  # Test
-        print headline  # Test
-    print articles
+    print articles  # Test
     #print len(articles)
 
 #make sure blank gui inputs are .........dealt with    if line = "", don't add it to list or something
@@ -138,40 +132,47 @@ else:  # If user specifies location
 
 
 ############################################################################################## Amy's Script
-"""
 url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
 headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
 
-articleURL = 'http://www.nytimes.com/2016/11/27/us/politics/steve-bannon-white-house.html?hp&action=click&pgtype=Homepage&clickSource=image&module=b-lede-package-region&region=top-news&WT.nav=top-news&_r=0' # Article URL to pass through HTML parser
+HLURLVals = HLURLnoLoc.values()  # Access dictionary URL values as a list and assign to variable
 
-r = requests.get(articleURL) # Create response object to make requests
+for val in HLURLVals:
 
-HTML = BeautifulSoup(r.text) # Create object to parse HTML text from webpage using Beautiful Soup and HTMLParser standard library
+    r = requests.get(val)  # Create response object to make requests from Geoparser
+    HTML = BeautifulSoup(r.text)  # Create object to parse HTML text from webpage using Beautiful Soup and HTMLParser standard library
+    articleTxt = [''.join(s.findAll(text=True)) for s in HTML.findAll('p')]  # Create list, find all HTML text elements, create for loop to find all paragraph elements in HTML, then join text to empty string. This converts all HTML text to string within list
+    artSlice = articleTxt[1:10]  # Slice list of article text to get first paragraph of article
+    GPinput = ''  # Initialize empty string
+    for item in artSlice:  # Create for loop to extract each line of body text and join to empty string
+        GPinput = GPinput + ''.join(item)
+    data = {'inputText': GPinput}  # Passing HTML text into Geoparser API
+    resp = requests.post(url, headers=headers, data=data)  # Create another response object to make request for Geoparser output
+    parsed_json = json.loads(resp.text)  # Decode json output from Geoparser
 
-articleTxt = [''.join(s.findAll(text=True))for s in HTML.findAll('p')] # Create list, find all HTML text elements, create for loop to find all paragraph elements in HTML, then join text to empty string. This converts all HTML text to string within list
+    if parsed_json['features'] == []:
+        print "-73.9904, 40.7562 New York Times building, NY, US"
+    else:
+        placeCoordinates = parsed_json['features'][0]['geometry']['coordinates']  # Index for coordinates of location in article
+        placeName = parsed_json['features'][0]['properties']['name']  # Index for name of location in article
+        placeADM1 = parsed_json['features'][0]['properties']['admin1']  # Index for first-level administrative district of location in article
+        placeCountry = parsed_json['features'][0]['properties']['country']  # Index for country of location in article
+        print placeCoordinates, placeName, placeADM1, placeCountry
 
-artSlice = articleTxt[1:10] # Slice list of article text to get first paragraph of article
+print 'success'
 
-GPinput = ''  
-for item in artSlice: # Create for loop to extract list elements and join to empty string
-    GPinput = GPinput + ''.join(item)
 
-data = {'inputText': GPinput} # Passing HTML text into Geoparser API
 
-resp = requests.post(url, headers=headers, data=data) # Create another response object to make request for Geoparser output
 
-json = json.loads(resp.text) # Decode json output from Geoparser
 
-if json['features'] == []:
-    print "-73.9904, 40.7562 New York Times building, NY, US"
-    
-else:
-    placeCoordinates = json['features'][0]['geometry']['coordinates'] # Index for coordinates of location in article
-    placeName = json['features'][0]['properties']['name'] # Index for name of location in article
-    placeADM1 = json['features'][0]['properties']['admin1'] # Index for first-level administrative district of location in article
-    placeCountry = json['features'][0]['properties']['country'] # Index for country of location in article
-    print placeCoordinates, placeName, placeADM1, placeCountry'''
-'''
+
+
+
+
+
+"""
+
+
 ############################################################################################# Haoyu's Script
 inputWorkspace = r'H:\GISComputerProgramming\FinalProject'
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
@@ -249,5 +250,5 @@ arcpy.MakeXYEventLayer_management(testCsv, 'Lat', 'Lon', output)
 print output
 saved = 'result.lyr'
 arcpy.SaveToLayerFile_management(output, saved)
-print saved'''
+print saved
 """
