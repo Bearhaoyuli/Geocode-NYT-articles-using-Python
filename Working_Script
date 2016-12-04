@@ -81,10 +81,7 @@ if geoLocation[1] == "":  # If no location is specified by user
         webURL = ele['web_url']  # Access web URL key in nested dictionary and assign to variable
         headline = ele['headline']['main']  # Access main headline in nested dictionary and assign to variable.
         HLURLnoLoc[headline] = webURL  # Updates empty dictionary with headline:URL pairs
-        print HLURLnoLoc  # Test
         print webURL  # Test
-        print headline  # Test
-    print articles  # Test
     #print len(articles)
 
 else:  # If user specifies location
@@ -92,7 +89,6 @@ else:  # If user specifies location
     print geoLocDict
     articles = api.search(q = wordSearch, fq = geoLocDict, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline'])
     accessKey = articles['response']['docs']  # Create variable that accesses keys of nested dictionaries from Article Search results
-    print articles  # Test
     #print len(articles)
 
 #make sure blank gui inputs are .........dealt with    if line = "", don't add it to list or something
@@ -137,37 +133,37 @@ headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
 
 HLURLVals = HLURLnoLoc.values()  # Access dictionary URL values as a list and assign to variable
 
-for val in HLURLVals:
-
+for val in HLURLVals:  # For loop to extract URLs
     r = requests.get(val)  # Create response object to make requests from Geoparser
     HTML = BeautifulSoup(r.text)  # Create object to parse HTML text from webpage using Beautiful Soup and HTMLParser standard library
     articleTxt = [''.join(s.findAll(text=True)) for s in HTML.findAll('p')]  # Create list, find all HTML text elements, create for loop to find all paragraph elements in HTML, then join text to empty string. This converts all HTML text to string within list
-    artSlice = articleTxt[1:10]  # Slice list of article text to get first paragraph of article
+
+    lstVal = [val]  # Create list of URL values
+    for ch in lstVal: # For loop to iterate through each letter in list of URL characters
+        if ch[23:28] == 'video':  # If characters within specified URL index values = 'video', return index 0
+            artSlice = articleTxt[0]  # Slice list of article text to get first line of video description
+        else:  # For all other scenarios, index for first 9 lines of the article
+            artSlice = articleTxt[1:10]
     GPinput = ''  # Initialize empty string
-    for item in artSlice:  # Create for loop to extract each line of body text and join to empty string
-        GPinput = GPinput + ''.join(item)
-    data = {'inputText': GPinput}  # Passing HTML text into Geoparser API
-    resp = requests.post(url, headers=headers, data=data)  # Create another response object to make request for Geoparser output
-    parsed_json = json.loads(resp.text)  # Decode json output from Geoparser
+
+    for item in artSlice:  # For loop to extract each line of body text and join to empty string
+        GPinput = GPinput + ''.join(item)  # Join each line of body text to empty string
+        data = {'inputText': GPinput}  # Passing HTML text into Geoparser API
+        resp = requests.post(url, headers=headers, data=data)  # Create another response object to make request for Geoparser output
+        parsed_json = json.loads(resp.text)  # Decode json output from Geoparser
 
     if parsed_json['features'] == []:
-        print "-73.9904, 40.7562 New York Times building, NY, US"
+        coordinateList = [[-73.9904, 40.7562], "New York Times building", "NY", "US"]
+        print coordinateList
     else:
         placeCoordinates = parsed_json['features'][0]['geometry']['coordinates']  # Index for coordinates of location in article
         placeName = parsed_json['features'][0]['properties']['name']  # Index for name of location in article
         placeADM1 = parsed_json['features'][0]['properties']['admin1']  # Index for first-level administrative district of location in article
         placeCountry = parsed_json['features'][0]['properties']['country']  # Index for country of location in article
-        print placeCoordinates, placeName, placeADM1, placeCountry
+        LocFound = [placeCoordinates, placeName, placeADM1, placeCountry]
+        print LocFound
 
 print 'success'
-
-
-
-
-
-
-
-
 
 
 """
