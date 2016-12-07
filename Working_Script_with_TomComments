@@ -11,72 +11,102 @@ from bs4 import BeautifulSoup
 
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb')  # NYT Article Search API key
 
-# Function to saves the user's inputs into a text file
-def save():
-    text = E1.get() + "\n" + "glocations, " + E2.get() + "\n" + E3.get() + "\n" + E4.get()  # The .get() returns the user's query inputs that were typed in the entry text boxes as a string
-    with open("QueryResults.txt", "w") as f:   # Creates and writes the user inputs into a text file which will be located in the same directory as this script
-        f.writelines(text) # Writes the string set to the 'text' variable into the text file
-
-# Function that creates the pop up message once the GO button is clicked on by the user
-def saveMessage():
-    tkMessageBox.showinfo("Query Message", "Success! Query in progress.")
-
-# Function that executes the 'save' and then 'saveMessage' functions once the GO button is clicked on by the user
-def buttonClicked():
-    save()
-    saveMessage()
+# Function to create the GUI
+def buildGUI():
     
-      
-top = Tk(className = "NYTimes Article Search GUI")    # Establishes the GUI and labels it with a title 
-top.minsize(width = 350, height = 100)     # Sets the dimensions of the GUI
+    # Function to saves the user's inputs into a text file
+    def save():
+        text = E1.get() + "\n" + "glocations, " + E2.get() + "\n" + E3.get() + "\n" + E4.get()  # The .get() returns the user's query inputs that were typed in the entry text boxes as a string
+        with open("QueryResults.txt", "w") as f:   # Creates and writes the user inputs into a text file which will be located in the same directory as this script
+            f.writelines(text) # Writes the string set to the 'text' variable into the text file
 
-# Sets up the 5 labels seen on the left side of the GUI 
-Label(top, text = "Search Words ***").grid(row=0)     # Searches through Headline, Body, and Byline
-Label(top, text = "Geographic Location (Only one)").grid(row=1)    
-Label(top, text = "Start Date (YYYYMMDD) ***").grid(row=2)
-Label(top, text = "End Date (YYYYMMDD) ***").grid(row=3)
+    # Function that creates the pop up message once the GO button is clicked on by the user
+    def saveMessage():
+        tkMessageBox.showinfo("Query Message", "Success! Query in progress.")
 
-Label(top, text = "*** = Required Field").grid(row=4)    # Note to the user
+    # Function that executes the 'save' and then 'saveMessage' functions once the GO button is clicked on by the user
+    def buttonClicked():
+        save()
+        saveMessage()
+    
+    top = Tk(className = "NYTimes Article Search GUI")    # Establishes the GUI and labels it with a title 
+    top.minsize(width = 350, height = 100)     # Sets the dimensions of the GUI
 
-# Sets up text boxes on the right side of the GUI for the user to type their query information into
-E1 = Entry(top)
-E2 = Entry(top)
-E3 = Entry(top)
-E4 = Entry(top)
+    # Sets up the 5 labels seen on the left side of the GUI 
+    Label(top, text = "Search Words ***").grid(row=0)     # Searches through Headline, Body, and Byline
+    Label(top, text = "Geographic Location (Only one)").grid(row=1)    
+    Label(top, text = "Start Date (YYYYMMDD) ***").grid(row=2)
+    Label(top, text = "End Date (YYYYMMDD) ***").grid(row=3)
 
-E1.grid(row=0, column=1)   
-E2.grid(row=1, column=1)
-E3.grid(row=2, column=1)
-E4.grid(row=3, column=1)
+    Label(top, text = "*** = Required Field").grid(row=4)    # Note to the user
 
-# Sets up the GO button at the botton of the GUI and specifies that when it is clicked, it call the buttonClicked function defined above
-Button(top, text = "GO", command = buttonClicked).grid(row=5, column=0)
+    # Sets up text boxes on the right side of the GUI for the user to type their query information into
+    E1 = Entry(top)
+    E2 = Entry(top)
+    E3 = Entry(top)
+    E4 = Entry(top)
 
-# Specifies the end of the GUI
-top.mainloop()
+    E1.grid(row=0, column=1)   
+    E2.grid(row=1, column=1)
+    E3.grid(row=2, column=1)
+    E4.grid(row=3, column=1)
 
-# Path to where the above text file is located, again it is located in the same directory as this script
-folderPath = "F:\\Tom_Smith_Python_Programming_Fall_2016\\Module_2_Comp_Programming_for_GIS\\Final_Project\\"
-inputFN = "QueryResults.txt"
-inputFilePath = folderPath + inputFN
+    # Sets up the GO button at the botton of the GUI and specifies that when it is clicked, it call the buttonClicked function defined above
+    Button(top, text = "GO", command = buttonClicked).grid(row=5, column=0)
 
-# Reads in the text file and sets all the lines of the text file to the variable names 'fileString'
-f1 = open(inputFilePath, "r")
-fileString = f1.read()
-f1.close()
+    # Specifies the end of the GUI
+    top.mainloop()
+
+    # Path to where the above text file is located, again it is located in the same directory as this script
+    folderPath = "F:\\Tom_Smith_Python_Programming_Fall_2016\\Module_2_Comp_Programming_for_GIS\\Final_Project\\"
+    inputFN = "QueryResults.txt"
+    inputFilePath = folderPath + inputFN
+
+    # Reads in the text file and sets all the lines of the text file to the variable names 'fileString'
+    f1 = open(inputFilePath, "r")
+    fileString = f1.read()
+    f1.close()
+
+    global queryList
+    queryList = fileString.split("\n")  # Creates a list in which each line of the text file is an element in the list 
+
+    global wordSearch
+    wordSearch = queryList[0]  # User input keywords
+    print wordSearch  # Test
+
+    global searchDateStart
+    searchDateStart = queryList[2]  # User input begin date
+    print searchDateStart  # Test
+
+    global searchDateEnd
+    searchDateEnd = queryList[3]  # User input end date
+    print searchDateEnd  # Test
+
+    global requiredFieldDict
+    global requiredFieldList
+    requiredFieldDict = {wordSearch: "Search Words", searchDateStart: "Start Date", searchDateEnd: "End Date"}
+    requiredFieldList = [wordSearch, searchDateStart, searchDateEnd]
+
+# Calls the function to create the GUI
+buildGUI()
 
 
-queryList = fileString.split("\n")  # Creates a list in which each line of the text file is an element in the list 
+# If one of the required fields in the GUI is left empty by the user, the GUI will reopen (blank) and a message will tell the user to fill in that field
+B = True
+while B:
+    B = False
+    for field in requiredFieldList:
+        if field == "":
+            B = True
+            print requiredFieldDict[field], "is a required field, please fill it in."
+            buildGUI()
+            break
+        
+    
+#############################################################
 
-wordSearch = queryList[0]  # User input keywords
-print wordSearch  # Test
 
-searchDateStart = queryList[2]  # User input begin date
-print searchDateStart  # Test
-
-searchDateEnd = queryList[3]  # User input end date
-print searchDateEnd  # Test
-
+       
 geoLocation = queryList[1].split(", ")     # Separates the fq type of "glocations" and the user's location query input so that they can be indexed and later referenced individually 
 HLURLnoLoc = {}  # Initialize empty dictionary to store headline:URL pairs when user specifies no location
 
@@ -256,3 +286,4 @@ saved = 'result.lyr'
 arcpy.SaveToLayerFile_management(output, saved)
 print saved
 """
+
