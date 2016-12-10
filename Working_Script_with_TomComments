@@ -2,15 +2,16 @@
 
 from Tkinter import *
 import tkMessageBox    #the * in previous line should already import this but need this line b/c of line 10 and 32
-import requests, json, csv, os    #arcpy
+import requests, json, csv, os, arcpy
 from nytimesarticle import articleAPI
 from geopy.geocoders import Nominatim
 from HTMLParser import HTMLParser
 from bs4 import BeautifulSoup
+
 ########################## TESTING USING: Clinton, 'New York', 20161108, 20161109
-
+arcpy.env.overwriteOutput = True  # Allows access to overwrite existing files
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb')  # NYT Article Search API key
-
+inputWorkspace = r'C:\Users\aleung\Documents\ComputerProgrammingforGIS'
 # Function to create the GUI
 def buildGUI():
     
@@ -58,7 +59,7 @@ def buildGUI():
     top.mainloop()
 
     # Path to where the above text file is located, again it is located in the same directory as this script
-    folderPath = "F:\\Tom_Smith_Python_Programming_Fall_2016\\Module_2_Comp_Programming_for_GIS\\Final_Project\\"
+    folderPath = 'C:\\Users\\aleung\\Documents\\ComputerProgrammingforGIS\\'
     inputFN = "QueryResults.txt"
     inputFilePath = folderPath + inputFN
 
@@ -104,8 +105,6 @@ while B:
         
     
 #############################################################
-
-
        
 geoLocation = queryList[1].split(", ")     # Separates the fq type of "glocations" and the user's location query input so that they can be indexed and later referenced individually 
 HLURLnoLoc = {}  # Initialize empty dictionary to store headline:URL pairs when user specifies no location
@@ -120,6 +119,7 @@ if geoLocation[1] == "":  # If no location is specified by user
         headline = ele['headline']['main']  # Access main headline in nested dictionary and assign to variable.
         HLURLnoLoc[headline] = webURL  # Updates empty dictionary with headline:URL pairs
         print webURL  # Test
+        print headline
     #print len(articles)
 
 else:  # If user specifies location
@@ -166,6 +166,7 @@ else:  # If user specifies location
 
 
 ############################################################################################## Amy's Script
+
 url = 'https://geoparser.io/api/geoparser' # URL for Geoparser.io service
 headers = {'Authorization': 'apiKey 96371282185817752'} # API key for Geoparser
 
@@ -201,44 +202,18 @@ for val in HLURLVals:  # For loop to extract URLs
         LocFound = [placeCoordinates, placeName, placeADM1, placeCountry]
         print LocFound
 
-print 'success'
-
-
-"""
-
+print LocFound
 
 ############################################################################################# Haoyu's Script
-inputWorkspace = r'H:\GISComputerProgramming\FinalProject'
-api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb') # API key
-
-articles = api.search(q = wordSearch, fq = {geoLocDict}, begin_date = searchDateStart, end_date = searchDateEnd, fl = ['web_url', 'lead_paragraph', 'abstract', 'source', 'headline', 'pub_date', 'byline'])
-
 
 geolocator = Nominatim()
 location = geolocator.geocode(geoLocDict)
 
-
 #print len(articles['response']['docs'])#f = keywords? indexing mess up?
 
-i = 0
-titles = []
-# loop every news record
-while i < len(articles['response']['docs']):
-    # append head line 
-    titles.append(articles['response']['docs'][i]['headline']['main'])# headLine
-    i= i+1
-
-u = 0
-urls = []
-# loop every news records
-while u < len(articles['response']['docs']):
-    # append url to list
-    urls.append(articles['response']['docs'][u]['web_url']) # urls
-    u= u+1
-
-
 geolocator = Nominatim()
-location = geolocator.geocode('New York')
+place = geoLocDict.values()
+location = geolocator.geocode(place)
 
 print location.raw['lon'], location.raw['lat']#location.raw['boundingbox']
 
@@ -255,35 +230,31 @@ w = csv.writer(f, delimiter = ',')
 w.writerow(header)
 
 #print title[1]
+print accessKey
+print len(accessKey)
+print accessKey[0]
 
+HaoyuDict = {}  # Create empty dictionary
+for ele in accessKey:  # Loop through each element in the Article Search nested dictionaries
+    articleURL = ele['web_url']  # Access web URL key in nested dictionary and assign to variable
+    mainHL = ele['headline']['main']  # Access main headline in nested dictionary and assign to variable
+    HaoyuDict[mainHL] = articleURL  # Update Haoyu's output dictionary
 
 t = 0
-while t < len(articles['response']['docs']):
-    print t
-    # title = str(titles[t])
-    title = titles[t].encode('utf-8')
-    title_origin = titles[t]
-    print title
-    print title_origin
-    # url = str(urls[t])
-    url = urls[t].encode('utf-8')
-    url_origin = urls[t]
-    print url
-    print url_origin
-    rows = [lat, lon, title, url]
+while t < len(accessKey):
+    urls = HaoyuDict.values()[t].encode('utf-8')
+    titles = HaoyuDict.keys()[t].encode('utf-8')
+    rows = [lat, lon, titles, urls]
+    t = t + 1
     w.writerow(rows)
-    t = t+ 1    
 
 f.close()
 
-
-arcpy.env.workspace = r'H:\GISComputerProgramming\FinalProject'
-print 1
+arcpy.env.workspace = r'C:\Users\aleung\Documents\ComputerProgrammingforGIS'
+print 20
 output = 'Geocode'
 arcpy.MakeXYEventLayer_management(testCsv, 'Lat', 'Lon', output)
 print output
 saved = 'result.lyr'
 arcpy.SaveToLayerFile_management(output, saved)
 print saved
-"""
-
