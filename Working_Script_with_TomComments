@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 ########################## TESTING USING: Clinton, 'New York', 20161108, 20161109
 arcpy.env.overwriteOutput = True  # Allows access to overwrite existing files
 api = articleAPI('8a7bed87ddf84a98bd560ba2eb3ba3fb')  # NYT Article Search API key
-inputWorkspace = r'D:\Computer Prog GIS\Final Project'   # Type user's working directory here
+inputWorkspace = r'C:\Users\Amy\Documents\GISComputerProgramming'   # Type user's working directory here
 # Function to create the GUI
 def buildGUI():
     
@@ -59,7 +59,7 @@ def buildGUI():
     top.mainloop()
 
     # Path to where the above text file is located, again it is located in the same directory as this script
-    folderPath = 'D:\\Computer Prog GIS\\Final Project\\'
+    folderPath = 'C:\\Users\Amy\\Documents\\GISComputerProgramming\\'
     inputFN = "QueryResults.txt"
     inputFilePath = folderPath + inputFN
 
@@ -139,7 +139,7 @@ if geoLocation[1] == "":  # If no location is specified by user
     t = 0
     for val in HLURLVals:  # For loop to extract URLs
         r = requests.get(val)  # Create response object to make requests from Geoparser
-        HTML = BeautifulSoup(r.text)  # Create object to parse HTML text from webpage using Beautiful Soup and HTMLParser standard library
+        HTML = BeautifulSoup(r.text, 'html.parser')  # Create object to parse HTML text from webpage using Beautiful Soup and HTMLParser standard library
         articleTxt = [''.join(s.findAll(text=True)) for s in HTML.findAll('p')]  # Create list, find all HTML text elements, create for loop to find all paragraph elements in HTML, then join text to empty string. This converts all HTML text to string within list
 
         lstVal = [val]  # Create list of URL values
@@ -221,23 +221,28 @@ else:  # If user specifies location
 
     f.close()
 
-arcpy.env.workspace = r'D:\Computer Prog GIS\Final Project'
-print "sadjhvsadjhsa"
-output = 'News Paper Articles'
+arcpy.env.workspace = r'C:\Users\Amy\Documents\GISComputerProgramming'
+output = 'News Paper Article Locations'
 arcpy.MakeXYEventLayer_management(testCsv, 'Lon', 'Lat', output)
 print output
 saved = 'result.lyr'
 arcpy.SaveToLayerFile_management(output, saved)
 print saved
- 
-
-mxd = arcpy.mapping.MapDocument('temp.mxd')
+mxd = arcpy.mapping.MapDocument('Output.mxd')
 df = arcpy.mapping.ListDataFrames(mxd)[0]
 lyr = arcpy.mapping.Layer('result.lyr')
+basemap = arcpy.mapping.Layer('Basemap.lyr')
+ref = arcpy.mapping.Layer('Reference.lyr')
+template = arcpy.mapping.Layer('Template.lyr')
+arcpy.management.ApplySymbologyFromLayer(lyr, template)
 arcpy.mapping.AddLayer(df, lyr)
-arcpy.management.ApplySymbologyFromLayer('result.lyr', 'template.lyr')
-arcpy.mapping.RemoveLayer(df, lyr)
-arcpy.mapping.AddLayer(df, lyr)
+arcpy.mapping.AddLayer(df, ref, 'BOTTOM')
+arcpy.mapping.AddLayer(df, basemap, 'BOTTOM')
+mxd.activeView = "PAGE_LAYOUT"
+arcpy.RefreshActiveView()
+arcpy.RefreshTOC()
 mxd.saveACopy('Final.mxd')
+
+
 
 print "Success"
