@@ -1,0 +1,29 @@
+
+arcpy.env.workspace = r'C:\Users\aleung\Documents\ComputerProgrammingforGIS'  # Set workspace to local folder
+output = 'News Paper Article Locations'  # Assign layer title to variable
+arcpy.MakeXYEventLayer_management(testCsv, 'Lon', 'Lat', output)  # Display XY coordinates from CSV file
+print output
+saved = 'result.lyr'  # Assign file name of geocoded articles to variable
+arcpy.SaveToLayerFile_management(output, saved)  # Save the XY point data to new layer file
+print saved
+mxd = arcpy.mapping.MapDocument('Output.mxd')  # Assign empty output map document to variable
+df = arcpy.mapping.ListDataFrames(mxd)[0]  # Activate and assign data frame we're working with to variable
+lyr = arcpy.mapping.Layer('result.lyr')  # Assign the geocoded article result data to layer object
+basemap = arcpy.mapping.Layer('Basemap.lyr')  # Assign basemap layer to variable
+ref = arcpy.mapping.Layer('Reference.lyr')  # Assign reference layer to variable
+template = arcpy.mapping.Layer('Template.lyr')  # Assign symbology template layer to variable
+arcpy.management.ApplySymbologyFromLayer(lyr, template)  # Apply symbology from template layer to geocoded article results layer
+arcpy.mapping.AddLayer(df, lyr)  # Add results layer to data frame
+arcpy.mapping.AddLayer(df, ref, 'BOTTOM')  # Add reference layer to data frame above basemap layer
+arcpy.mapping.AddLayer(df, basemap, 'BOTTOM')  # Add basemap layer to bottom of active data frame
+labelLyr = arcpy.mapping.ListLayers(mxd, '', df)[0]  # Activate and assign geocoded article results layer to variable
+labelLyr.showLabels = True  # Turn on labels for results layer
+mxd.activeView = "PAGE_LAYOUT"
+arcpy.RefreshActiveView()
+arcpy.RefreshTOC()
+mxd.saveACopy('Final.mxd')  # Save a copy of the output map document as a final map document for viewing
+
+
+
+print "Success"
+
