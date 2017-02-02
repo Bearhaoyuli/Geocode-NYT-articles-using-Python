@@ -11,13 +11,22 @@ GIS for computer programming project to geocode and automate mapping of New York
 
 Links to the module documents: 
 “Tkinter”: https://www.tutorialspoint.com/python/python_gui_programming.htm 
+
 “requests”: https://github.com/kennethreitz/requests, http://docs.python-requests.org/en/master/
+
 “json”: https://docs.python.org/2/library/json.html
+
 “csv”: https://docs.python.org/2/library/csv.html
+
 “os”: https://docs.python.org/2/library/os.html 
+
 “nytimesarticle”: https://pypi.python.org/pypi/nytimesarticle/0.1.0
+
 “articleAPI”: https://developer.nytimes.com/article_search_v2.json
+
 “geopy”: https://geopy.readthedocs.io/en/1.11.0/
+
 “HTMLParser”: https://docs.python.org/2/library/htmlparser.html
+
 “bs4”: https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 
