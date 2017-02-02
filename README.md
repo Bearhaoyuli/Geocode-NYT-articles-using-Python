@@ -1,6 +1,6 @@
 # Geocoding NYT articles using Python
 
-# This script automatted the process of map making based on user inputted creterias and geocode the article location
+This script automatted the process of map making based on user inputted creterias and geocode the article location
 
 Before this program can run, users should "pip install" a few modules that are not in the standard Python library. 
 
